@@ -1,6 +1,6 @@
 from typing import List
 
-from flask import abort, request, session
+from flask import abort, request
 from flask_restx import Namespace, Resource
 
 from CTFd.api.v1.helpers.models import build_model_filters
@@ -203,9 +203,14 @@ class UserPublic(Resource):
 
         return {"success": True, "data": response.data}
 
+
+@users_namespace.route("/verify/<secret>")
+@users_namespace.param("secret", "User Secret")
+class UserSecret(Resource):
     @admins_only
+    @check_account_visibility
     @users_namespace.doc(
-        description="Endpoint to edit a specific User object",
+        description="Endpoint to get a specific User object, by providing the secret.",
         responses={
             200: ("Success", "UserDetailedSuccessResponse"),
             400: (
@@ -214,56 +219,22 @@ class UserPublic(Resource):
             ),
         },
     )
-    def patch(self, user_id):
-        user = Users.query.filter_by(id=user_id).first_or_404()
-        data = request.get_json()
-        data["id"] = user_id
+    def get(self, secret):
+        user = Users.query.filter_by(secret=secret).first_or_404()
 
-        # Admins should not be able to ban themselves
-        if data["id"] == session["id"] and (
-            data.get("banned") is True or data.get("banned") == "true"
-        ):
-            return (
-                {"success": False, "errors": {"id": "You cannot ban yourself"}},
-                400,
-            )
+        if (user.banned or user.hidden) and is_admin() is False:
+            abort(404)
 
-        schema = UserSchema(view="admin", instance=user, partial=True)
-        response = schema.load(data)
+        user_type = get_current_user_type(fallback="user")
+        response = UserSchema(view=user_type).dump(user)
+
         if response.errors:
             return {"success": False, "errors": response.errors}, 400
 
-        db.session.commit()
+        response.data["place"] = user.place
+        response.data["score"] = user.score
 
-        response = schema.dump(response.data)
-
-        db.session.close()
-
-        clear_user_session(user_id=user_id)
-        clear_standings()
-
-        return {"success": True, "data": response}
-
-    @admins_only
-    @users_namespace.doc(
-        description="Endpoint to delete a specific User object",
-        responses={200: ("Success", "APISimpleSuccessResponse")},
-    )
-    def delete(self, user_id):
-        Notifications.query.filter_by(user_id=user_id).delete()
-        Awards.query.filter_by(user_id=user_id).delete()
-        Unlocks.query.filter_by(user_id=user_id).delete()
-        Submissions.query.filter_by(user_id=user_id).delete()
-        Solves.query.filter_by(user_id=user_id).delete()
-        Tracking.query.filter_by(user_id=user_id).delete()
-        Users.query.filter_by(id=user_id).delete()
-        db.session.commit()
-        db.session.close()
-
-        clear_user_session(user_id=user_id)
-        clear_standings()
-
-        return {"success": True}
+        return {"success": True, "data": response.data}
 
 
 @users_namespace.route("/me")

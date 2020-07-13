@@ -26,38 +26,42 @@
 					<form id="user-profile-form" method="post" accept-charset="utf-8" autocomplete="off" role="form"
 						class="form-horizontal">
 						<div class="form-group">
-							<b>{{ form.name.label }}</b>
+							{{ form.name.label }}
 							{{ form.name(class="form-control", value=name) }}
 						</div>
 						<div class="form-group">
-							<b>{{ form.email.label }}</b>
+							{{ form.email.label }}
 							{{ form.email(class="form-control", value=email) }}
 						</div>
 
 						<hr>
 
 						<div class="form-group">
-							<b>{{ form.confirm.label }}</b>
+							{{ form.confirm.label }}
 							{{ form.confirm(class="form-control") }}
 						</div>
 						<div class="form-group">
-							<b>{{ form.password.label }}</b>
+							{{ form.password.label }}
 							{{ form.password(class="form-control") }}
 						</div>
 
 						<hr>
 
 						<div class="form-group">
-							<b>{{ form.affiliation.label }}</b>
+							{{ form.affiliation.label }}
 							{{ form.affiliation(class="form-control", value=affiliation or "") }}
 						</div>
 						<div class="form-group">
-							<b>{{ form.website.label }}</b>
+							{{ form.website.label }}
 							{{ form.website(class="form-control", value=website or "") }}
 						</div>
 						<div class="form-group">
-							<b>{{ form.country.label }}</b>
+							{{ form.country.label }}
 							{{ form.country(class="form-control custom-select", value=country) }}
+						</div>
+						<div class="form-group">
+							{{ form.secret.label }}
+							{{ form.secret(class="form-control", value=secret, disabled=True) }}
 						</div>
 
 						<div id="results" class="form-group">
@@ -73,7 +77,7 @@
 					{% with form = Forms.self.TokensForm() %}
 					<form method="POST" id="user-token-form">
 						<div class="form-group">
-							<b>{{ form.expiration.label }}</b>
+							{{ form.expiration.label }}
 							{{ form.expiration(class="form-control") }}
 						</div>
 

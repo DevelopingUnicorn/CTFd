@@ -15,6 +15,7 @@ class SettingsForm(BaseForm):
     website = URLField("Website")
     country = SelectField("Country", choices=SELECT_COUNTRIES_LIST)
     submit = SubmitField("Submit")
+    secret = StringField("Secret")
 
 
 class TokensForm(BaseForm):

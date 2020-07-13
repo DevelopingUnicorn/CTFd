@@ -286,6 +286,7 @@ def settings():
     website = user.website
     affiliation = user.affiliation
     country = user.country
+    secret = user.secret
 
     tokens = UserTokens.query.filter_by(user_id=user.id).all()
 
@@ -311,6 +312,7 @@ def settings():
         tokens=tokens,
         prevent_name_change=prevent_name_change,
         infos=infos,
+        secret=secret
     )
 
 
